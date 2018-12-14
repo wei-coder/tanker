@@ -1,0 +1,19 @@
+一、类库说明
+      1、Adafruit_I2C.py，Adafruit_PWM_Servo_Driver.py是Adafruit的底层类库
+      2、Adafruit_MotorHAT.py  核心类库，提供了电机控制方法，并自定义了舵机的控制方法
+      3、关于类库的方法说明，请查看Test.py文件注释
+      4、更多的文档请参考Adafruit类库说明：
+https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/using-stepper-motors
+
+
+二、示例说明
+      1、ArmRobot.py是对类库的封装，模拟机器人的运动。使用方法参考ArmRobotTest.py文件
+
+三、遥控示例说明
+     1、运行命令启动服务
+           sudo python RPi_Server_Code.py
+     2、用手机或者其他终端打开浏览器，输入网址，如：
+         http://192.168.1.77:9093/    其中IP地址更换为树莓派的IP地址
+     3、打开页面后，再地址栏输入树莓派的IP，然后点击连接按钮，就可以实现遥控了，手机横屏模式更容易操作。
+     4、服务器是基于tornado，关于tornado的资料请上网查找。
+             
