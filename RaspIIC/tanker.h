@@ -14,6 +14,7 @@ public:
 	void right();
 	void backward();
 	void forward();
+	void stop();
 	void moveto(int x,int y);
 };
 

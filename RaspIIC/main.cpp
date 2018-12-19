@@ -1,10 +1,27 @@
+/*********************************************************
+author:wei-coder
+date:2018-12-19
+filename:main.cpp
+description:Ö÷³ÌÐòº¯Êý
+**********************************************************/
+
 #include <csocket>
+#include <sys/select.h>
+
 #include "motor_driver.h"
 #include "tanker.h"
 
 #define CTLBD_ADDR	0X40
 #define SERVER_PORT	8090
 
+using std::cout;
+using std::endl;
+
+
+int swapInt32(int value)
+{
+     return ((value & 0x000000FF) << 24) | ((value & 0x0000FF00) << 8) | ((value & 0x00FF0000) >> 8) | ((value & 0xFF000000) >> 24);
+}
 
 int main(int argc, char * argv[])
 {
@@ -64,30 +81,49 @@ int main(int argc, char * argv[])
 	fd_set fdset;
 	FD_ZERO(&fdset);
 	FD_SET(controller, &fdset);
-	char order[10];
+	order_t order;
 	int buflen = 0;
 	while(1)
 	{
 		int result = select(1, NULL, &fdset, &fdset, (struct timeval *) 10); 
-		if(result < 1) 
+		if(result < 1)
 		{
-			cout << "there is a fatal errorï¼ EXIT" << endl;
-			exit(1); 
+			cout << "there is a fatal error! EXIT" << endl;
+			exit(1);
 		}
 		else
 		{
 			if(FD_ISSET(controller,&fdset))
-			{ 
-				buflen = recvfrom(controller,order,256,0);
-				switch(order[0])
+			{
+				buflen = recv(controller,(void *)(&order), 256,0);
+				if(sizeof(order_t) > buflen)
+				{
+					continue;
+				}
+				order.speed = swapInt32(order.speed);
+				order.pos_x = swapInt32(order.pos_x);
+				order.pos_y = swapInt32(order.pos_y);
+				switch(order.order[0])
 				{
 					case 'l':
+						tanker.left(order.speed);
 						break;
 					case 'r':
+						tanker.right(order.speed);
 						break;
 					case 'f':
+						tanker.forward(order.speed);
 						break;
 					case 'b':
+						tanker.backward(order.speed);
+						break;
+					case 's':
+						tanker.stop();
+						break;
+					case 'g':
+						tanker.moveto(order.pos_x,order.pos_y,order.speed);
+						break;
+					default:
 						break;
 				}
 			}

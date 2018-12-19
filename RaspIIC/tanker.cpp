@@ -38,6 +38,12 @@ void Tanker::forward(int speed = DEFAULT_SPEED)
 	lmotor.run(BACKWARD);
 }
 
+void Tanker::stop()
+{
+	rmotor.run(RELEASE);
+	lmotor.run(RELEASE);
+}
+
 void Tanker::moveto(int x,int y, int speed = DEFAULT_SPEED)
 {
 	unsigned int t = 1;
