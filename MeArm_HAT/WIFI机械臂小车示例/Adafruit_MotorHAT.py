@@ -255,7 +255,7 @@ class Adafruit_MotorHAT:
 		self._frequency = freq		# default @1600Hz PWM freq
 		self.motors = [ Adafruit_DCMotor(self, m) for m in range(4) ]
 		self.steppers = [ Adafruit_StepperMotor(self, 1), Adafruit_StepperMotor(self, 2) ]
-                self.servos= [ Adafruit_Servo(self,0),Adafruit_Servo(self,1),Adafruit_Servo(self,14),Adafruit_Servo(self,15)]
+        self.servos= [ Adafruit_Servo(self,0),Adafruit_Servo(self,1),Adafruit_Servo(self,14),Adafruit_Servo(self,15)]
 		self._pwm =  PWM(addr, debug=False)
 		self._pwm.setPWMFreq(self._frequency)
 
