@@ -14,8 +14,24 @@ unsigned char MICROSTEP_CURVE[] = {0, 25, 50, 74, 98, 120, 141, 162, 180, 197, 2
 using std::cout;
 using std::endl;
 
-StepperMotor::StepperMotor(int num, MotorHAT * mc, int steps):MC(mc)
+StepperMotor::StepperMotor():MC(NULL)
 {
+	revsteps = 0;
+	motornum = 0;
+	sec_per_step = 0;
+	steppingcounter = 0;
+	currentstep = 0;
+	PWMA = 0;
+	AIN2 = 0;
+	AIN1 = 0;
+	PWMB = 0;
+	BIN2 = 0;
+	BIN1 = 0;
+}
+
+void StepperMotor::init(int num, MotorHAT * mc, int steps)
+{
+	MC = mc;
 	revsteps = steps;
 	motornum = num;
 	sec_per_step = 0.1;
@@ -266,8 +282,17 @@ void StepperMotor::step(int steps, int direction, int stepstyle)
 }
 
 //直流电机
-DCMotor::DCMotor(int num, MotorHAT * mc):MC(mc)
+DCMotor::DCMotor():MC(NULL)
 {
+	motornum = 0;
+	PWMpin = 0;
+	IN1pin = 0;
+	IN2pin = 0;
+}
+
+void DCMotor::init(int num, MotorHAT * mc)
+{
+	MC = mc;
 	motornum = num;
 	int pwm = 0;
 	int in1 = 0;
@@ -344,8 +369,14 @@ void DCMotor::setSpeed(int speed)
 }
 
 //舵机
-Servo::Servo(int num, MotorHAT * mc):MC(mc)
+Servo::Servo():MC(NULL)
 {
+	servonum = 0;
+}
+
+void Servo::init(int num, MotorHAT * mc)
+{
+	MC = mc;
 	servonum = num;
 }
 
@@ -374,21 +405,20 @@ void Servo::setServoPulse(int channel, float pulse)
 }
 
 //控制器
-MotorHAT::MotorHAT(int addr, int freq)
+MotorHAT::MotorHAT(int addr, int freq):_pwm(addr,false)
 {
 	_i2caddr = addr;		//default addr on HAT
 	_frequency = freq;		//default @1600Hz PWM freq
-	motors[0] = DCMotor::DCMotor(0,this);
-	motors[1] = DCMotor::DCMotor(1,this);
-	motors[2] = DCMotor::DCMotor(2,this);
-	motors[3] = DCMotor::DCMotor(3,this);
-	steppers[0] = StepperMotor::StepperMotor(1,this);
-	steppers[1] = StepperMotor::StepperMotor(2,this);
-	servos[0]= Servo::Servo(0,this);
-	servos[1]= Servo::Servo(1,this);
-	servos[2= Servo::Servo(2,this);
-	servos[3]= Servo::Servo(3,this);
-	_pwm = PWM::PWM(addr, false);
+	motors[0].init(0,this);
+	motors[1].init(1,this);
+	motors[2].init(2,this);
+	motors[3].init(3,this);
+	steppers[0].init(1,this);
+	steppers[1].init(2,this);
+	servos[0].init(0,this);
+	servos[1].init(1,this);
+	servos[2].init(2,this);
+	servos[3].init(3,this);
 	_pwm.setPWMFreq(_frequency);
 }
 

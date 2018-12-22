@@ -35,8 +35,8 @@ private:
 	int currentstep;
 
 public:
-	StepperMotor(int num, MotorHAT * mc=NULL,int steps=200);
-//	StepperMotor(StepperMotor & sMotor);
+	StepperMotor();
+	void init(int num, MotorHAT * mc,int steps=200);
 	void setSpeed(int rpm);
 	int oneStep(int dir, int style);
 	void step(int steps, int direction, int stepstyle);
@@ -53,8 +53,8 @@ private:
 	int IN2pin;
 	
 public:
-	DCMotor(int num, MotorHAT * mc=NULL);
-//	DCMotor(DCMotor & dMotor);
+	DCMotor();
+	void init(int num, MotorHAT * mc);
 	void  run(int command);
 	void setSpeed(int speed);
 };
@@ -67,8 +67,8 @@ private:
 	MotorHAT * MC;
 	
 public:
-	Servo(int num, MotorHAT * mc=NULL);
-//	Servo(Servo & servo);
+	Servo();
+	void init(int num, MotorHAT * mc);
 	void write(int x);
 	void setServoPulse(int channel, float pulse);
 };
@@ -86,7 +86,6 @@ private:
 public:
 	PWM _pwm;
 	MotorHAT(int addr, int freq);
-//	MotorHAT(MotorHAT & mhat);
 	void setPin(int pin, int value);
 	StepperMotor & getStepper(int num);
 	DCMotor & getMotor(int num);
