@@ -1,18 +1,21 @@
 
+#include <iostream>
 #include <ctime>
+#include <unistd.h>
 #include "iicdriver.h"
 #include "pwmserv_driver.h"
 
-void softwareReset(I2C_dev cls)
+using std::cout;
+using std::endl;
+
+void PWM::softwareReset(I2C_dev & cls)
 {
 	//"Sends a software reset (SWRST) command to all the servo drivers on the bus"
 	cls.writeRaw8(0x06);
 }
 
-PWM::PWM(int address, bool debug)
+PWM::PWM(int address, bool debug):iic(address,debug)
 {
-	iic = I2C_dev(address);
-	iic.debug = debug;
 	addr = address;
 	this->debug = debug;
 	if (this->debug)
@@ -50,7 +53,7 @@ void PWM::setPWMFreq(int freq)
 
 	int oldmode = iic.readU8(__MODE1);
 	int newmode = (oldmode & 0x7F) | 0x10;			//sleep
-	iic.write8(__MODE1, newmode)        			//go to sleep
+	iic.write8(__MODE1, newmode);        			//go to sleep
 	iic.write8(__PRESCALE, prescale);
 	iic.write8(__MODE1, oldmode);
 	usleep(5000);

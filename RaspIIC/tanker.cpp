@@ -1,9 +1,9 @@
+#include <unistd.h>
 #include "tanker.h"
+#include "motor_driver.h"
 
-Tanker::Tanker(DCMotor & left,DCMotor & right)
+Tanker::Tanker(DCMotor & left,DCMotor & right):lmotor(left),rmotor(right)
 {
-	lmotor = left;
-	rmotor = right;
 }
 
 void Tanker::left(int speed = TURN_SPEED)

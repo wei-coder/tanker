@@ -1,3 +1,7 @@
+#ifndef __MOTOR_DRIVER_H
+#define __MOTOR_DRIVER_H
+
+#include "pwmserv_driver.h"
 
 #define MICROSTEPS 8
 
@@ -10,6 +14,8 @@
 #define	DOUBLE		2
 #define	INTERLEAVE	3
 #define	MICROSTEP	4
+
+class MotorHAT;
 
 //步进电机
 class StepperMotor
@@ -29,7 +35,8 @@ private:
 	int currentstep;
 
 public:
-	StepperMotor(int num, int steps);
+	StepperMotor(int num, MotorHAT * mc=NULL,int steps=200);
+//	StepperMotor(StepperMotor & sMotor);
 	void setSpeed(int rpm);
 	int oneStep(int dir, int style);
 	void step(int steps, int direction, int stepstyle);
@@ -46,7 +53,8 @@ private:
 	int IN2pin;
 	
 public:
-	DCMotor(int num);
+	DCMotor(int num, MotorHAT * mc=NULL);
+//	DCMotor(DCMotor & dMotor);
 	void  run(int command);
 	void setSpeed(int speed);
 };
@@ -59,7 +67,8 @@ private:
 	MotorHAT * MC;
 	
 public:
-	Servo(int num);
+	Servo(int num, MotorHAT * mc=NULL);
+//	Servo(Servo & servo);
 	void write(int x);
 	void setServoPulse(int channel, float pulse);
 };
@@ -77,9 +86,11 @@ private:
 public:
 	PWM _pwm;
 	MotorHAT(int addr, int freq);
+//	MotorHAT(MotorHAT & mhat);
 	void setPin(int pin, int value);
 	StepperMotor & getStepper(int num);
 	DCMotor & getMotor(int num);
 	Servo & getServo(int num);
 };
 
+#endif

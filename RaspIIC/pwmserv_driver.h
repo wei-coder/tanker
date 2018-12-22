@@ -1,4 +1,8 @@
 
+#ifndef __PWMSERV_DRIVER_H_
+#define __PWMSERV_DRIVER_H_
+
+#include "iicdriver.h"
 
 // Registers/etc.
 #define	__MODE1				0x00
@@ -31,10 +35,11 @@ public:
   int	addr;
   bool	debug;
 
-  void softwareReset(I2C_dev cls);
-  PWM(int address, bool debug);
+  void softwareReset(I2C_dev & cls);
+  PWM(int address=0x40, bool debug=false);
   void setPWMFreq(int freq);
   void setPWM(int channel, int on, int off);
   void setAllPWM(int on, int off);
 };
 
+#endif

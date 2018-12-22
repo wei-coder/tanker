@@ -1,15 +1,18 @@
 
+#ifndef __IIC_DRIVER_H_
+#define __IIC_DRIVER_H_
+
 class I2C_dev
 {
 private:
 	int addr;
-	bool debug;
 	int dev;
 	int getPiRevision();
 	int getPiI2CBusNumber();
 
 public:
-	void I2C_dev(int address, int busnum=-1, bool debug);
+	bool debug;
+	I2C_dev(int address, bool debug);
 	int errMsg();
 	int write8(int reg, int value);
 	int write16(int reg, int value);
@@ -21,4 +24,4 @@ public:
 	int readU16(int reg);
 	int readS16(int reg);
 };
-
+#endif

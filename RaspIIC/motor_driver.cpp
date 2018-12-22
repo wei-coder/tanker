@@ -1,5 +1,7 @@
 #include <iostream>
-
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include "motor_driver.h"
 #include "pwmserv_driver.h"
 
@@ -9,10 +11,11 @@ unsigned char MICROSTEP_CURVE[] = {0, 50, 98, 142, 180, 212, 236, 250, 255};
 unsigned char MICROSTEP_CURVE[] = {0, 25, 50, 74, 98, 120, 141, 162, 180, 197, 212, 225, 236, 244, 250, 253, 255};
 #endif
 
+using std::cout;
+using std::endl;
 
-StepperMotor::StepperMotor(int num, int steps)
+StepperMotor::StepperMotor(int num, MotorHAT * mc, int steps):MC(mc)
 {
-	MC = NULL;
 	revsteps = steps;
 	motornum = num;
 	sec_per_step = 0.1;
@@ -177,19 +180,31 @@ int StepperMotor::oneStep(int dir, int style)
 	{
 		if((currentstep >= 0) &&(currentstep < MICROSTEPS))
 		{
-			coils = {1, 1, 0, 0};
+			coils[0] = 1;
+			coils[1] = 1;
+			coils[2] = 0;
+			coils[3] = 0;
 		}
-        else if((currentstep >= MICROSTEPS) && (currentstep < MICROSTEPS*2))
-        {
-			coils = {0, 1, 1, 0};
-        }
+		else if((currentstep >= MICROSTEPS) && (currentstep < MICROSTEPS*2))
+		{
+			coils[0] = 0;
+			coils[1] = 1;
+			coils[2] = 1;
+			coils[3] = 0;
+		}
 		else if((currentstep >= MICROSTEPS*2) && (currentstep < MICROSTEPS*3))
 		{
-			coils = {0, 0, 1, 1};
+			coils[0] = 0;
+			coils[1] = 0;
+			coils[2] = 1;
+			coils[3] = 1;
 		}
-        else if((currentstep >= MICROSTEPS*3) && (currentstep < MICROSTEPS*4))
-        {
-			coils = {1, 0, 0, 1};
+		else if((currentstep >= MICROSTEPS*3) && (currentstep < MICROSTEPS*4))
+		{
+			coils[0] = 1;
+			coils[1] = 0;
+			coils[2] = 0;
+			coils[3] = 1;
 		}
 	}
 	else
@@ -203,14 +218,14 @@ int StepperMotor::oneStep(int dir, int style)
 			{0, 0, 1, 1},
 			{0, 0, 0, 1},
 			{1, 0, 0, 1}};
-		coils = step2coils[currentstep/(MICROSTEPS/2)];
+		memcpy(coils,step2coils[currentstep/(MICROSTEPS/2)],4*sizeof(int));
 	}
 
 	//print "coils state = " + str(coils)
-	MC.setPin(AIN2, coils[0]);
-	MC.setPin(BIN1, coils[1]);
-	MC.setPin(AIN1, coils[2]);
-	MC.setPin(BIN2, coils[3]);
+	MC->setPin(AIN2, coils[0]);
+	MC->setPin(BIN1, coils[1]);
+	MC->setPin(AIN1, coils[2]);
+	MC->setPin(BIN2, coils[3]);
 
 	return currentstep;
 }
@@ -219,7 +234,7 @@ void StepperMotor::step(int steps, int direction, int stepstyle)
 {
 	float s_per_s = sec_per_step;
 	int lateststep = 0;
-	
+
 	if (stepstyle == INTERLEAVE)
 	{
 		s_per_s = s_per_s / 2.0;
@@ -251,28 +266,27 @@ void StepperMotor::step(int steps, int direction, int stepstyle)
 }
 
 //直流电机
-DCMotor::DCMotor(int num)
+DCMotor::DCMotor(int num, MotorHAT * mc):MC(mc)
 {
-	MC = NULL;
 	motornum = num;
-    int pwm = 0;
+	int pwm = 0;
 	int in1 = 0;
 	int in2 = 0;
 
-    if (num == 0)
-    {
+	if (num == 0)
+	{
 		pwm = 8;
 		in2 = 9;
 		in1 = 10;
-    }
-    else if (num == 1)
-    {
+	}
+	else if (num == 1)
+	{
 		pwm = 13;
 		in2 = 12;
 		in1 = 11;
-    }
-    else if (num == 2)
-    {
+	}
+	else if (num == 2)
+	{
 		pwm = 2;
 		in2 = 3;
 		in1 = 4;
@@ -301,18 +315,18 @@ void  DCMotor::run(int command)
 	}
 	if (command == FORWARD)
 	{
-		MC.setPin(IN2pin, 0);
-		MC.setPin(IN1pin, 1);
+		MC->setPin(IN2pin, 0);
+		MC->setPin(IN1pin, 1);
 	}
 	if(command == BACKWARD)
 	{
-		MC.setPin(IN1pin, 0);
-		MC.setPin(IN2pin, 1);
+		MC->setPin(IN1pin, 0);
+		MC->setPin(IN2pin, 1);
 	}
 	if (command == RELEASE)
 	{
-		MC.setPin(IN1pin, 0);
-		MC.setPin(IN2pin, 0);
+		MC->setPin(IN1pin, 0);
+		MC->setPin(IN2pin, 0);
 	}
 }
 
@@ -326,13 +340,12 @@ void DCMotor::setSpeed(int speed)
 	{
 		speed = 255;
 	}
-	MC._pwm.setPWM(PWMpin, 0, speed*16);
+	MC->_pwm.setPWM(PWMpin, 0, speed*16);
 }
 
 //舵机
-Servo::Servo(int num)
+Servo::Servo(int num, MotorHAT * mc):MC(mc)
 {
-	MC = NULL;
 	servonum = num;
 }
 
@@ -351,13 +364,13 @@ void Servo::setServoPulse(int channel, float pulse)
     float pulseLength = 1000000.0;                   //1,000,000 us per second
     printf("%d fre",MC._frequency);
     pulseLength /= MC._frequency;         //60 Hz
-    printf("%d us per period",pulseLength);
+    printf("%f us per period",pulseLength);
     pulseLength /= 4096.0;                     //12 bits of resolution
     printf("%f us per bit",pulseLength);
     pulse *= 1000.0;
     pulse /= (pulseLength*1.0)
     printf("%f pulse",pulse);
-    MC._pwm.setPWM(channel, 0, int(pulse));
+    MC->_pwm.setPWM(channel, 0, int(pulse));
 }
 
 //控制器
@@ -365,16 +378,16 @@ MotorHAT::MotorHAT(int addr, int freq)
 {
 	_i2caddr = addr;		//default addr on HAT
 	_frequency = freq;		//default @1600Hz PWM freq
-	motors[0] = DCMotor::DCMotor(this,0);
-	motors[1] = DCMotor::DCMotor(this,1);
-	motors[2] = DCMotor::DCMotor(this,2);
-	motors[3] = DCMotor::DCMotor(this,3);
-	steppers[0] = StepperMotor::StepperMotor(this,1);
-	steppers[1] = StepperMotor::StepperMotor(this,2);
-	servos[0]= Servo::Servo(this,0);
-	servos[1]= Servo::Servo(this,1);
-	servos[2= Servo::Servo(this,14);
-	servos[3]= Servo::Servo(this,15);
+	motors[0] = DCMotor::DCMotor(0,this);
+	motors[1] = DCMotor::DCMotor(1,this);
+	motors[2] = DCMotor::DCMotor(2,this);
+	motors[3] = DCMotor::DCMotor(3,this);
+	steppers[0] = StepperMotor::StepperMotor(1,this);
+	steppers[1] = StepperMotor::StepperMotor(2,this);
+	servos[0]= Servo::Servo(0,this);
+	servos[1]= Servo::Servo(1,this);
+	servos[2= Servo::Servo(2,this);
+	servos[3]= Servo::Servo(3,this);
 	_pwm = PWM::PWM(addr, false);
 	_pwm.setPWMFreq(_frequency);
 }

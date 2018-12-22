@@ -1,8 +1,10 @@
 
 #include <iostream>
 #include <fstream>
-#include <regex>
-#include <smbus>
+#include <wiringPiI2C.h>
+#include <linux/i2c-dev.h>
+#include <linux/i2c.h>
+#include "iicdriver.h"
 
 using std::cout;
 using std::endl;
@@ -12,22 +14,7 @@ using std::endl;
 
 int I2C_dev::getPiRevision()
 {
-	ifstream infile("/proc/cpuinfo");
-	char line[1024] = {0};
-	while(infile.getline(line,8))
-	{
-		regex rev_reg("Revision\s+:\s+.*(\w{4})$");
-		smatch r1;
-		if(regex_match(line,r1,rev_reg))
-		{
-			match.group(1) in ['0000', '0002', '0003']:
-		}
-		else
-		{
-			return 2
-		}
-	}
-	return 0
+	return 2;
 }
 
 int I2C_dev::getPiI2CBusNumber()
@@ -35,21 +22,16 @@ int I2C_dev::getPiI2CBusNumber()
     return getPiRevision()>1?1:0;
 }
 
-I2C_dev::I2C_dev(int address, int busnum=-1, bool debug)
+I2C_dev::I2C_dev(int address, bool debug=false)
 {
     addr = address;
-    dev = open("dev/i2c-%d", O_RDWR);
-	if(dev < 0)
-	{
-		cout << "Open dev/i2c-  failed!" << endl;
-		exit(1);
-	}
-	if(ioctl(dev,I2C_SLAVE, addr) < 0)
-	{
-		cout << "Open Slave device failed!" << endl;
-		exit(1);
-	}
-    debug = debug;
+    dev = wiringPiI2CSetup(addr);
+    if(dev < 0)
+    {
+	cout << "Open dev/i2c-  failed!" << endl;
+	exit(1);
+    }
+    this->debug = debug;
 }
 
 int I2C_dev::errMsg()
@@ -63,7 +45,7 @@ int I2C_dev::write8(int reg, int value)
 	int ret = wiringPiI2CWriteReg8(dev, reg, value);
 	if(ret < 0)
 	{
-        cout << "I2C: Wrote " << value << " to register " << reg << endl;
+        	cout << "I2C: Wrote " << value << " to register " << reg << endl;
 		return errMsg();
 	}
 	return ret;
@@ -85,13 +67,13 @@ int I2C_dev::writeRaw8(int value)
 	int ret = wiringPiI2CWrite(dev,value);
 	if(ret < 0)
 	{
-		cout << "I2C: Wrote " << value << " to slave device " << reg << endl;
+		cout << "I2C: Wrote " << value << " to slave device " << endl;
 		return errMsg();
 	}
 	return ret;
 }
 
-
+#if 0
 int I2C_dev::writeList(unsigned char reg, unsigned char length, unsigned char * plist)
 {
 	int ret = i2c_smbus_write_i2c_block_data(dev,reg,length,plist);
@@ -113,7 +95,7 @@ int I2C_dev::readList(unsigned char reg, unsigned char length)
 	}
 	return ret;
 }
-
+#endif
 int I2C_dev::readU8(int reg)
 {
 	int ret = wiringPiI2CReadReg8(dev, reg);
