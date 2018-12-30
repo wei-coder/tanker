@@ -14,13 +14,13 @@ LD=ld
 RM=rm
 
 FLAGS = -c -Wall -ggdb -gstabs+ -fno-stack-protector -I ./
-LD_FLAGS = -lwiringPi
+LD_FLAGS = -lwiringPi -lpthread -lstdc++
 
 TARGET=tanker
 
 start:$(OBJS)
 	@echo 生成可执行文件 $< ...
-	$(CC) -o $(TARGET) $(OBJS)
+	$(LD) $(LD_FLAGS) -o $(TARGET) $(OBJS)
 
 .cpp.o:
 	@echo 编译代码文件 $< ...

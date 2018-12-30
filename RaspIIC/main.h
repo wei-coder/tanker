@@ -5,6 +5,8 @@ filename:main.h
 description:主程序头文件
 **********************************************************/
 
+#define ORDER_LEN	16
+
 typedef struct Order
 {
 	int		speed;

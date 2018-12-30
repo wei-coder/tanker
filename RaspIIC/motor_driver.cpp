@@ -338,20 +338,23 @@ void  DCMotor::run(int command)
 	{
 		return;
 	}
-	if (command == FORWARD)
+	switch(command)
 	{
-		MC->setPin(IN2pin, 0);
-		MC->setPin(IN1pin, 1);
-	}
-	if(command == BACKWARD)
-	{
-		MC->setPin(IN1pin, 0);
-		MC->setPin(IN2pin, 1);
-	}
-	if (command == RELEASE)
-	{
-		MC->setPin(IN1pin, 0);
-		MC->setPin(IN2pin, 0);
+		case FORWARD:
+			MC->setPin(IN2pin, 0);
+			MC->setPin(IN1pin, 1);
+			break;
+		case BACKWARD:
+			MC->setPin(IN1pin, 0);
+			MC->setPin(IN2pin, 1);
+			break;
+		case RELEASE:
+			MC->setPin(IN1pin, 0);
+			MC->setPin(IN2pin, 0);
+			break;
+		default:
+			cout << "invalid command" << endl;
+			break;
 	}
 }
 
@@ -384,7 +387,7 @@ void Servo::write(int x)
 {
     float y=x/90.0+0.6;
     printf("AAAA x:%d,y:%f",x,y);
-    y=y>0,6?y:0.6;
+    y=y>0.6?y:0.6;
     y=y<2.5?y:2.5;
     printf("BBBB x:%d,y:%f",x,y);
     setServoPulse(servonum,y);
@@ -393,13 +396,13 @@ void Servo::write(int x)
 void Servo::setServoPulse(int channel, float pulse)
 {
     float pulseLength = 1000000.0;                   //1,000,000 us per second
-    printf("%d fre",MC._frequency);
-    pulseLength /= MC._frequency;         //60 Hz
+    printf("%d fre",MC->_frequency);
+    pulseLength /= MC->_frequency;         //60 Hz
     printf("%f us per period",pulseLength);
     pulseLength /= 4096.0;                     //12 bits of resolution
     printf("%f us per bit",pulseLength);
     pulse *= 1000.0;
-    pulse /= (pulseLength*1.0)
+    pulse /= (pulseLength*1.0);
     printf("%f pulse",pulse);
     MC->_pwm.setPWM(channel, 0, int(pulse));
 }
@@ -429,9 +432,9 @@ void MotorHAT::setPin(int pin, int value)
 		cout << "PWM pin must be between 0 and 15 inclusive,EXIT!" << endl;
 		exit(0);
 	}
-	if((value != 0) || (value != 1))
+	if((value != 0) && (value != 1))
 	{
-		cout << "Pin value must be 0 or 1! EXIT!" << endl;
+		cout << "Pin value " << value << " must be 0 or 1! EXIT!" << endl;
 		exit(0);
 	}
 	if (value == 0)
@@ -448,8 +451,8 @@ StepperMotor & MotorHAT::getStepper(int num)
 {
 	if((num < 1) || (num > 2))
 	{
-    	cout << "MotorHAT Stepper must be between 1 and 2 inclusive" << endl;
-		exit();
+	    	cout << "MotorHAT Stepper must be between 1 and 2 inclusive" << endl;
+		exit(0);
 	}
 	return steppers[num-1];
 }
@@ -459,7 +462,7 @@ DCMotor & MotorHAT::getMotor(int num)
 	if((num < 1) || (num > 4))
 	{
 		cout << "MotorHAT Motor must be between 1 and 4 inclusive" << endl;
-		exit();
+		exit(0);
 	}
 	return motors[num-1];
 }

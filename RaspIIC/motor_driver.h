@@ -78,14 +78,14 @@ class MotorHAT
 {
 private:
  	int _i2caddr;
-	int _frequency;
 	DCMotor motors[4];
 	StepperMotor steppers[2];
 	Servo servos[4];
 	
 public:
+	int _frequency;
 	PWM _pwm;
-	MotorHAT(int addr, int freq);
+	MotorHAT(int addr, int freq=1600);
 	void setPin(int pin, int value);
 	StepperMotor & getStepper(int num);
 	DCMotor & getMotor(int num);
